@@ -1,0 +1,14 @@
+E:\personal\assignments\MeawJson\bin\Debug\net10.0\MeawJson.exe
+E:\personal\assignments\MeawJson\bin\Debug\net10.0\MeawJson.deps.json
+E:\personal\assignments\MeawJson\bin\Debug\net10.0\MeawJson.runtimeconfig.json
+E:\personal\assignments\MeawJson\bin\Debug\net10.0\MeawJson.dll
+E:\personal\assignments\MeawJson\bin\Debug\net10.0\MeawJson.pdb
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.GeneratedMSBuildEditorConfig.editorconfig
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.AssemblyInfoInputs.cache
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.AssemblyInfo.cs
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.csproj.CoreCompileInputs.cache
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.dll
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\refint\MeawJson.dll
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.pdb
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\MeawJson.genruntimeconfig.cache
+E:\personal\assignments\MeawJson\obj\Debug\net10.0\ref\MeawJson.dll

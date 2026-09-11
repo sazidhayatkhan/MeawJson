@@ -20,4 +20,4 @@ It has three little pieces:
 dotnet run
 ```
 
-PRs and ideas welcome — but honestly, this is mostly for learning. Have fun.
+PRs and ideas welcome

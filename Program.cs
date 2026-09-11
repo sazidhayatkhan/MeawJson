@@ -84,8 +84,33 @@ var data = new Dictionary<string, object>
 // Console.WriteLine(JsonSerializer.Serialize(null));
 // Console.WriteLine(JsonSerializer.Serialize(names));
 // Console.WriteLine(JsonSerializer.Serialize(numbers));
-Console.WriteLine(JsonSerializer.Serialize(data));
+// Console.WriteLine(JsonSerializer.Serialize(data));
 // Console.WriteLine(JsonSerializer.Serialize(users));
+
+// var parser = new JsonParser("true");
+
+// var result = parser.Parse();
+
+// Console.WriteLine(result);
+
+
+// var parser = new JsonParser("\"Hello World\"");
+
+// var result = parser.Parse();
+
+// Console.WriteLine(result);
+
+// var parser = new JsonParser("\"Hello\\nWorld\"");
+
+// var result = parser.Parse();
+
+// Console.WriteLine(result);
+
+var parser = new JsonParser("\"\\u0048\\u0065\\u006C\\u006C\\u006F\"");
+
+var result = parser.Parse();
+
+Console.WriteLine(result);
 
 public class User
 {

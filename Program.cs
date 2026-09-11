@@ -178,21 +178,52 @@
 //     Console.WriteLine(score);
 // }
 
+// string json = """
+
+//    {
+//     "name": "John",
+//     "matrix": [
+//         [1, 2],
+//         [3, 4],
+//         [5, 6]
+//     ]
+
+// }
+// """;
+
+// var user = JsonDeserializer.Deserialize<User>(json);
+
+// Console.WriteLine(user?.Name);
+
+// foreach (var row in user?.Matrix ?? [])
+// {
+//     Console.WriteLine(string.Join(", ", row));
+// }
 string json = """
 {
-    "name": "John",
-    "scores": [90, 80, 95]
+    "name": "Suravee",
+    "age": 25,
+    "id": "550e8400-e29b-41d4-a716-446655440000",
+    "createdAt": "2026-09-11T20:00:00",
+    "status": "Active"
 }
 """;
+var user =
+    JsonDeserializer.Deserialize<User>(json);
 
-var user = JsonDeserializer.Deserialize<User>(json);
+Console.WriteLine(user!.Name);
+Console.WriteLine(user.Age);
+Console.WriteLine(user.Id);
+Console.WriteLine(user.CreatedAt);
+Console.WriteLine(user.Status);
 
-Console.WriteLine(user?.Name);
+var data =
+    JsonDeserializer.Deserialize<Dictionary<string, int>>(
+        """{"math":90,"science":85}"""
+    );
 
-foreach (var score in user?.Scores ?? [])
-{
-    Console.WriteLine(score);
-}
+Console.WriteLine(data["math"]);
+Console.WriteLine(data["science"]);
 
 // public class User
 // {
@@ -205,11 +236,41 @@ foreach (var score in user?.Scores ?? [])
 //     public Address Address { get; set; } = new Address();
 // }
 
+// public class User
+// {
+//     public string Name { get; set; } = "";
+
+//     public List<int> Scores { get; set; } = [];
+// }
+
+
+// public class User
+// {
+//     public string Name { get; set; } = "";
+
+//     public List<List<int>> Matrix { get; set; } = [];
+// }
+
+// public class User
+// {
+//     public string Name { get; set; } = "";
+//     public int? Age { get; set; }
+// }
+
+public enum UserStatus
+{
+    Active,
+    Inactive,
+    Suspended
+}
+
 public class User
 {
     public string Name { get; set; } = "";
-
-    public List<int> Scores { get; set; } = [];
+    public int? Age { get; set; }
+    public Guid Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public UserStatus Status { get; set; }
 }
 
 public class Address

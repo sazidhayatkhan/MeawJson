@@ -1,10 +1,8 @@
 using System.Globalization;
-using System.Collections;
-using System.Globalization;
 
 namespace MeawJson;
 
-public static class JsonDeserializer
+public static partial class JsonDeserializer
 {
     public static T? Deserialize<T>(string json)
     {
@@ -23,14 +21,19 @@ public static class JsonDeserializer
     {
         if (value == null)
         {
-            return null;
+            if (IsNullableType(targetType))
+            {
+                return null;
+            }
+
+            throw new JsonException(
+                $"Cannot assign null to {targetType.Name}.");
         }
 
         if (targetType.IsInstanceOfType(value))
         {
             return value;
         }
-
 
         Type? underlyingType =
             Nullable.GetUnderlyingType(targetType);
@@ -103,7 +106,6 @@ public static class JsonDeserializer
                 $"Invalid value '{stringValue}' for enum {targetType.Name}.");
         }
 
-
         if (targetType.IsPrimitive ||
             targetType == typeof(decimal))
         {
@@ -121,7 +123,6 @@ public static class JsonDeserializer
             }
         }
 
-
         if (value is Dictionary<string, object?> dictionary)
         {
             if (targetType.IsGenericType &&
@@ -136,7 +137,6 @@ public static class JsonDeserializer
                 dictionary,
                 targetType);
         }
-
 
         if (value is List<object?> list)
         {
@@ -153,160 +153,13 @@ public static class JsonDeserializer
         }
 
         throw new JsonException(
-            $"Cannot convert value to {targetType.Name}.");
+            $"Cannot convert JSON value of type " +
+            $"{value.GetType().Name} to {targetType.Name}.");
     }
 
-    private static object ConvertObject(
-    Dictionary<string, object?> dictionary,
-    Type targetType)
+    private static bool IsNullableType(Type type)
     {
-        object instance = Activator.CreateInstance(targetType)!;
-
-        var properties = targetType.GetProperties();
-
-        foreach (var property in properties)
-        {
-            var matchingKey = dictionary.Keys.FirstOrDefault(
-                key => string.Equals(
-                    key,
-                    property.Name,
-                    StringComparison.OrdinalIgnoreCase));
-
-            if (matchingKey == null)
-            {
-                continue;
-            }
-
-            object? propertyValue = dictionary[matchingKey];
-
-            object? convertedValue = ConvertValue(
-                propertyValue,
-                property.PropertyType);
-
-            property.SetValue(
-                instance,
-                convertedValue);
-        }
-
-        return instance;
-    }
-    private static object ConvertList(
-    List<object?> list,
-    Type targetType)
-    {
-        Type elementType;
-
-        if (targetType.IsGenericType)
-        {
-            elementType =
-                targetType.GetGenericArguments()[0];
-        }
-        else
-        {
-            throw new JsonException(
-                $"Cannot determine collection element type for {targetType.Name}.");
-        }
-
-        Type listType =
-            typeof(List<>).MakeGenericType(elementType);
-
-        object result =
-            Activator.CreateInstance(listType)!;
-
-        var addMethod =
-            listType.GetMethod("Add")!;
-
-        foreach (var item in list)
-        {
-            object? convertedItem =
-                ConvertValue(
-                    item,
-                    elementType);
-
-            addMethod.Invoke(
-                result,
-                new[] { convertedItem });
-        }
-
-        return result;
-    }
-    private static object ConvertArray(
-    List<object?> list,
-    Type targetType)
-    {
-        Type elementType =
-            targetType.GetElementType()!;
-
-        Array result =
-            Array.CreateInstance(
-                elementType,
-                list.Count);
-
-        for (int i = 0; i < list.Count; i++)
-        {
-            object? convertedItem =
-                ConvertValue(
-                    list[i],
-                    elementType);
-
-            result.SetValue(
-                convertedItem,
-                i);
-        }
-
-        return result;
-    }
-
-    private static object ConvertDictionary(
-    Dictionary<string, object?> source,
-    Type targetType)
-    {
-        if (!targetType.IsGenericType ||
-            targetType.GetGenericTypeDefinition() != typeof(Dictionary<,>))
-        {
-            throw new JsonException(
-                $"Unsupported dictionary type: {targetType.Name}.");
-        }
-
-        Type[] genericArguments =
-            targetType.GetGenericArguments();
-
-        Type keyType = genericArguments[0];
-        Type valueType = genericArguments[1];
-
-        if (keyType != typeof(string))
-        {
-            throw new JsonException(
-                "JSON object keys must map to string dictionary keys.");
-        }
-
-        Type dictionaryType =
-            typeof(Dictionary<,>).MakeGenericType(
-                keyType,
-                valueType);
-
-        object result =
-            Activator.CreateInstance(dictionaryType)!;
-
-        var addMethod =
-            dictionaryType.GetMethod("Add")!;
-
-        foreach (var pair in source)
-        {
-            object? convertedValue =
-                ConvertValue(
-                    pair.Value,
-                    valueType);
-
-            addMethod.Invoke(
-                result,
-                new object?[]
-                {
-                pair.Key,
-                convertedValue
-                });
-        }
-
-        return result;
+        return !type.IsValueType ||
+               Nullable.GetUnderlyingType(type) != null;
     }
 }

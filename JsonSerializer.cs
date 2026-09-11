@@ -21,6 +21,12 @@ public static class JsonSerializer
             int or long or float or double or decimal
                 => Convert.ToString(value, CultureInfo.InvariantCulture)!,
 
+            DateTime dateTime => $"\"{dateTime.ToString("O", CultureInfo.InvariantCulture)}\"",
+
+            Guid guid => $"\"{guid}\"",
+
+            Enum e => $"\"{e}\"",
+
             Dictionary<string, object> dict
                 => SerializeDictionary(dict),
 

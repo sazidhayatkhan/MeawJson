@@ -244,4 +244,3 @@ public class SpecialUser
     public Guid Id { get; set; }
     public UserRole Role { get; set; }
 }
-

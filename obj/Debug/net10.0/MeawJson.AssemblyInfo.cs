@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MeawJson")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3a15c48ea3aea98b1049ab2888ea53f712c3d5df")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+370f2b16c9c4c88c24b3fa3d22f019978b95048d")]
 [assembly: System.Reflection.AssemblyProductAttribute("MeawJson")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MeawJson")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

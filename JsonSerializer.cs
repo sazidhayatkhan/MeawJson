@@ -7,53 +7,74 @@ public static class JsonSerializer
 {
     public static string Serialize(object? value)
     {
+        return Serialize(
+            value,
+            new HashSet<object>(
+                ReferenceEqualityComparer.Instance));
+    }
+
+    private static string Serialize(
+        object? value,
+        HashSet<object> references)
+    {
         if (value == null)
         {
             return "null";
         }
 
-        return value switch
+        switch (value)
         {
-            string => $"\"{EscapeString((string)value)}\"",
-
-            bool => (bool)value ? "true" : "false",
-
-            int or long or float or double or decimal
-                => Convert.ToString(value, CultureInfo.InvariantCulture)!,
-
-            DateTime dateTime => $"\"{dateTime.ToString("O", CultureInfo.InvariantCulture)}\"",
-
-            Guid guid => $"\"{guid}\"",
-
-            Enum e => $"\"{e}\"",
-
-            Dictionary<string, object> dict
-                => SerializeDictionary(dict),
-
-            IEnumerable => SerializeCollection((IEnumerable)value),
-
-
-            _ => SerializeObject(value)
-        };
+            case string: return $"\"{EscapeString((string)value)}\"";
+            case bool: return (bool)value ? "true" : "false";
+            case int or long or float or double or decimal:
+                return Convert.ToString(value, CultureInfo.InvariantCulture)!;
+            case DateTime dateTime:
+                return $"\"{dateTime.ToString("O", CultureInfo.InvariantCulture)}\"";
+            case Guid guid:
+                return $"\"{guid}\"";
+            case Enum e:
+                return $"\"{e}\"";
+            case Dictionary<string, object> dict:
+                return SerializeDictionary(dict, references);
+            case IEnumerable:
+                return SerializeCollection((IEnumerable)value, references);
+            default:
+                return SerializeObject(value, references);
+        }
     }
 
-    private static string SerializeObject(object value)
+    private static string SerializeObject(
+        object value,
+        HashSet<object> references)
     {
-        var type = value.GetType();
-        var properties = type.GetProperties();
-
-        var parts = new List<string>();
-
-        foreach (var property in properties)
+        if (!references.Add(value))
         {
-            var propertyValue = property.GetValue(value);
-
-            var jsonValue = Serialize(propertyValue);
-
-            parts.Add($"\"{property.Name}\":{jsonValue}");
+            throw new JsonException(
+                $"Circular reference detected while serializing {value.GetType().Name}.");
         }
 
-        return "{" + string.Join(",", parts) + "}";
+        try
+        {
+            var type = value.GetType();
+            var properties = type.GetProperties();
+
+            var parts = new List<string>();
+
+            foreach (var property in properties)
+            {
+                var propertyValue = property.GetValue(value);
+
+                var jsonValue = Serialize(propertyValue, references);
+
+                parts.Add($"\"{property.Name}\":{jsonValue}");
+            }
+
+            return "{" + string.Join(",", parts) + "}";
+        }
+        finally
+        {
+            references.Remove(value);
+        }
     }
 
     private static string EscapeString(string value)
@@ -65,32 +86,62 @@ public static class JsonSerializer
             .Replace("\r", "\\r")
             .Replace("\t", "\\t");
     }
-    private static string SerializeCollection(IEnumerable collection)
-    {
-        var parts = new List<string>();
 
-        foreach (var item in collection)
+    private static string SerializeCollection(
+        IEnumerable collection,
+        HashSet<object> references)
+    {
+        if (!references.Add(collection))
         {
-            parts.Add(Serialize(item));
+            throw new JsonException(
+                "Circular reference detected while serializing a collection.");
         }
 
-        return "[" + string.Join(",", parts) + "]";
+        try
+        {
+            var parts = new List<string>();
+
+            foreach (var item in collection)
+            {
+                parts.Add(Serialize(item, references));
+            }
+
+            return "[" + string.Join(",", parts) + "]";
+        }
+        finally
+        {
+            references.Remove(collection);
+        }
     }
 
     private static string SerializeDictionary(
-        Dictionary<string, object> dictionary)
+        Dictionary<string, object> dictionary,
+        HashSet<object> references)
     {
-        var parts = new List<string>();
-
-        foreach (var pair in dictionary)
+        if (!references.Add(dictionary))
         {
-            var key = EscapeString(pair.Key);
-
-            var value = Serialize(pair.Value);
-
-            parts.Add($"\"{key}\":{value}");
+            throw new JsonException(
+                "Circular reference detected while serializing a dictionary.");
         }
 
-        return "{" + string.Join(",", parts) + "}";
+        try
+        {
+            var parts = new List<string>();
+
+            foreach (var pair in dictionary)
+            {
+                var key = EscapeString(pair.Key);
+
+                var value = Serialize(pair.Value, references);
+
+                parts.Add($"\"{key}\":{value}");
+            }
+
+            return "{" + string.Join(",", parts) + "}";
+        }
+        finally
+        {
+            references.Remove(dictionary);
+        }
     }
 }
